@@ -3,35 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>My Forum</title>
+  <title>Cerbium Forum</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: auto;
+      font-family: system-ui, -apple-system, Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      margin: 0;
       padding: 20px;
+      max-width: 900px;
+      margin: auto;
     }
 
-    input, textarea, button {
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #60a5fa;
+    }
+
+    h2 {
+      margin-top: 30px;
+      color: #93c5fd;
+    }
+
+    input, textarea {
       width: 100%;
-      margin: 5px 0;
-      padding: 10px;
+      padding: 12px;
+      margin: 6px 0;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #1e293b;
+      color: white;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      border-radius: 8px;
+      border: none;
+      background: #3b82f6;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #2563eb;
     }
 
     .topic {
-      border: 1px solid #ccc;
-      padding: 10px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 12px;
+      border-radius: 10px;
       margin-top: 10px;
+    }
+
+    .topic h3 {
+      margin: 0 0 5px 0;
+      color: #60a5fa;
+    }
+
+    .topic p {
+      margin: 0;
+      color: #cbd5e1;
     }
   </style>
 </head>
 
 <body>
 
-<h1>My Forum</h1>
+<h1>Cerbium Forum</h1>
 
 <h2>Register / Login</h2>
 
@@ -64,23 +111,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password
-    });
+    const { error } = await supabase.auth.signUp({ email, password });
 
     if (error) return alert(error.message);
-    alert("Registered!");
+    alert("Registered! Check your email.");
   };
 
   window.login = async function () {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) return alert(error.message);
     alert("Logged in!");
@@ -88,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.logout = async function () {
     await supabase.auth.signOut();
-    alert("Logged out");
+    alert("Logged out!");
   };
 
   window.createTopic = async function () {
