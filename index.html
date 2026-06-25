@@ -17,6 +17,11 @@
       padding: 20px;
     }
 
+    h1 {
+      text-align: center;
+      color: #60a5fa;
+    }
+
     input, textarea {
       width: 100%;
       padding: 10px;
@@ -47,21 +52,9 @@
     }
 
     .user {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
+      font-size: 13px;
       opacity: 0.8;
       margin-bottom: 5px;
-    }
-
-    .avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: #334155;
-      background-size: cover;
-      background-position: center;
     }
   </style>
 </head>
@@ -94,7 +87,7 @@
 <script>
 const supabase = window.supabase.createClient(
   "https://oemorffqkzzrekogbhpl.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...."
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lbW9yZmZxa3p6cmVrb2diaHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTEwODksImV4cCI6MjA5NzkyNzA4OX0.JigEIAh4-IEbzVSvEpPKhPEzpGU8-f1Agtm-7TMzAfQ"
 );
 
 // REGISTER
@@ -119,7 +112,7 @@ window.register = async function () {
     avatar_url: avatar
   });
 
-  alert("Registered! Check your email if confirmation is on.");
+  alert("Registered! Check email if confirmation is enabled.");
 };
 
 // LOGIN
@@ -145,6 +138,7 @@ window.logout = async function () {
 // CREATE TOPIC
 window.createTopic = async function () {
   const { data: { user } } = await supabase.auth.getUser();
+
   if (!user) return alert("You must be logged in");
 
   const { data: profile } = await supabase
@@ -164,6 +158,7 @@ window.createTopic = async function () {
 
   if (error) return alert(error.message);
 
+  alert("Topic created!");
   loadTopics();
 };
 
@@ -171,7 +166,7 @@ window.createTopic = async function () {
 async function loadTopics() {
   const { data } = await supabase
     .from("topics")
-    .select("*, profiles(username, avatar_url)")
+    .select("*, profiles(username)")
     .order("created_at", { ascending: false });
 
   const div = document.getElementById("topics");
@@ -181,8 +176,7 @@ async function loadTopics() {
     div.innerHTML += `
       <div class="topic">
         <div class="user">
-          <div class="avatar" style="background-image:url('${t.profiles?.avatar_url || ""}')"></div>
-          <strong>${t.profiles?.username || "Unknown"}</strong>
+          ${t.profiles?.username || "Unknown user"}
         </div>
         <h3>${t.title}</h3>
         <p>${t.content}</p>
