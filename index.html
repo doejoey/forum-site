@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My Forum</title>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -32,8 +33,49 @@
 
 <h1>My Forum</h1>
 
-<h2>Test</h2>
-<p>If you see this, layout is restored correctly.</p>
+<h2>Register / Login</h2>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="register()">Register</button>
+<button onclick="login()">Login</button>
+<button onclick="logout()">Logout</button>
+
+<h2>Create Topic</h2>
+<input id="title" placeholder="Topic title">
+<textarea id="content" placeholder="Topic content"></textarea>
+<button onclick="createTopic()">Post Topic</button>
+
+<h2>Topics</h2>
+<div id="topics"></div>
+
+<script>
+console.log("JS loaded");
+
+// SAFE TEST FUNCTIONS FIRST (no Supabase yet)
+
+function register() {
+  alert("Register button works");
+}
+
+function login() {
+  alert("Login button works");
+}
+
+function logout() {
+  alert("Logout button works");
+}
+
+function createTopic() {
+  alert("Create topic button works");
+}
+
+function loadTopics() {
+  console.log("load topics placeholder");
+}
+
+loadTopics();
+</script>
 
 </body>
 </html>
