@@ -1,172 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cerbium</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    body {
-      font-family: system-ui;
-      background: #0f172a;
-      color: #e2e8f0;
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      border-radius: 8px;
-      border: 1px solid #334155;
-      background: #1e293b;
-      color: white;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      border-radius: 8px;
-      border: none;
-      background: #3b82f6;
-      color: white;
-      font-weight: bold;
-    }
-
-    .topic {
-      background: #1e293b;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 10px;
-    }
-  </style>
+  <title>TRUTH TEST</title>
 </head>
-
 <body>
 
-<h1>Cerbium</h1>
+<h1>TRUTH TEST PAGE</h1>
 
-<input id="email" placeholder="email">
-<input id="password" placeholder="password">
-<input id="username" placeholder="username">
-
-<button onclick="register()">Register</button>
-<button onclick="login()">Login</button>
-<button onclick="logout()">Logout</button>
-
-<hr>
-
-<input id="title" placeholder="title">
-<textarea id="content" placeholder="content"></textarea>
-<button onclick="createTopic()">Post Topic</button>
-
-<h2>Topics</h2>
-<div id="topics"></div>
+<button onclick="alert('STEP 1 WORKS')">STEP 1</button>
 
 <script>
-console.log("Cerbium v4 loaded");
+alert("STEP 2 SCRIPT RUNNING");
 
-// SAFE INIT (prevents silent failure)
-const supabase = window.supabase.createClient(
-  "https://oemorffqkzzrekogbhpl.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lbW9yZmZxa3p6cmVrb2diaHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTEwODksImV4cCI6MjA5NzkyNzA4OX0.JigEIAh4-IEbzVSvEpPKhPEzpGU8-f1Agtm-7TMzAfQ"
-);
-
-// REGISTER (SAFE)
-window.register = async function () {
-  try {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const username = document.getElementById("username").value;
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password
-    });
-
-    if (error) return alert(error.message);
-
-    if (data?.user) {
-      await supabase.from("profiles").insert({
-        id: data.user.id,
-        username
-      });
-    }
-
-    alert("Registered!");
-  } catch (e) {
-    alert("Register crash: " + e.message);
-  }
-};
-
-// LOGIN
-window.login = async function () {
-  const { error } = await supabase.auth.signInWithPassword({
-    email: document.getElementById("email").value,
-    password: document.getElementById("password").value
-  });
-
-  if (error) return alert(error.message);
-  alert("Logged in");
-};
-
-// LOGOUT
-window.logout = async function () {
-  await supabase.auth.signOut();
-  alert("Logged out");
-};
-
-// CREATE TOPIC (SAFE)
-window.createTopic = async function () {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) return alert("Not logged in");
-
-    const title = document.getElementById("title").value;
-    const content = document.getElementById("content").value;
-
-    const { error } = await supabase.from("topics").insert({
-      title,
-      content,
-      author_id: user.id
-    });
-
-    if (error) return alert(error.message);
-
-    alert("Topic created");
-    loadTopics();
-  } catch (e) {
-    alert("Topic error: " + e.message);
-  }
-};
-
-// LOAD TOPICS
-async function loadTopics() {
-  const { data } = await supabase
-    .from("topics")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  const div = document.getElementById("topics");
-  div.innerHTML = "";
-
-  data?.forEach(t => {
-    div.innerHTML += `
-      <div class="topic">
-        <b>${t.title}</b>
-        <p>${t.content}</p>
-      </div>
-    `;
-  });
-}
-
-loadTopics();
+console.log("SCRIPT IS EXECUTING");
 </script>
 
 </body>
