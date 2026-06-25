@@ -2,183 +2,36 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cerbium Forum</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    body {
-      font-family: system-ui;
-      background: #0f172a;
-      color: #e2e8f0;
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
-    }
-
-    h1 { color: #60a5fa; text-align: center; }
-
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      border-radius: 8px;
-      border: 1px solid #334155;
-      background: #1e293b;
-      color: white;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      border-radius: 8px;
-      border: none;
-      background: #3b82f6;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .topic {
-      background: #1e293b;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 10px;
-    }
-
-    .user {
-      font-size: 13px;
-      opacity: 0.8;
-      margin-bottom: 5px;
-    }
-  </style>
+  <title>Cerbium DEBUG</title>
 </head>
 
 <body>
 
-<h1>Cerbium</h1>
+<h1>Cerbium Debug Mode</h1>
 
-<h2>Register</h2>
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<input id="username" placeholder="Username">
-<button onclick="register()">Register</button>
+<button onclick="test()">TEST BUTTON</button>
+<button onclick="register()">REGISTER TEST</button>
 
-<h2>Login</h2>
-<input id="loginEmail" placeholder="Email">
-<input id="loginPassword" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-<button onclick="logout()">Logout</button>
-
-<h2>Create Topic</h2>
-<input id="title" placeholder="Title">
-<textarea id="content" placeholder="Content"></textarea>
-<button onclick="createTopic()">Post Topic</button>
-
-<h2>Topics</h2>
-<div id="topics"></div>
+<input id="email" placeholder="email">
+<input id="password" placeholder="password">
 
 <script>
-const supabase = window.supabase.createClient(
-  "https://oemorffqkzzrekogbhpl.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lbW9yZmZxa3p6cmVrb2diaHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTEwODksImV4cCI6MjA5NzkyNzA4OX0.JigEIAh4-IEbzVSvEpPKhPEzpGU8-f1Agtm-7TMzAfQ"
-);
+console.log("SCRIPT STARTED");
 
-// REGISTER
-window.register = async function () {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const username = document.getElementById("username").value;
-
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password
-  });
-
-  if (error) return alert(error.message);
-
-  const user = data.user;
-
-  await supabase.from("profiles").insert({
-    id: user.id,
-    username
-  });
-
-  alert("Registered!");
+// 🧪 SIMPLE TEST FUNCTION
+window.test = function () {
+  alert("TEST BUTTON WORKS");
 };
 
-// LOGIN
-window.login = async function () {
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) return alert(error.message);
-
-  alert("Logged in!");
+// 🧪 REGISTER TEST (NO SUPABASE)
+window.register = function () {
+  alert("REGISTER FUNCTION FIRED");
 };
 
-// LOGOUT
-window.logout = async function () {
-  await supabase.auth.signOut();
-  alert("Logged out!");
+// 🔥 FORCE ERROR CHECK
+window.onerror = function (msg) {
+  alert("JS ERROR: " + msg);
 };
-
-// CREATE TOPIC
-window.createTopic = async function () {
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) return alert("You must be logged in");
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  const title = document.getElementById("title").value;
-  const content = document.getElementById("content").value;
-
-  const { error } = await supabase.from("topics").insert({
-    title,
-    content,
-    author_id: profile.id
-  });
-
-  if (error) return alert(error.message);
-
-  alert("Topic created!");
-  loadTopics();
-};
-
-// LOAD TOPICS
-async function loadTopics() {
-  const { data } = await supabase
-    .from("topics")
-    .select("*, profiles(username)")
-    .order("created_at", { ascending: false });
-
-  const div = document.getElementById("topics");
-  div.innerHTML = "";
-
-  data?.forEach(t => {
-    div.innerHTML += `
-      <div class="topic">
-        <div class="user">${t.profiles?.username || "Unknown"}</div>
-        <h3>${t.title}</h3>
-        <p>${t.content}</p>
-      </div>
-    `;
-  });
-}
-
-loadTopics();
 </script>
 
 </body>
