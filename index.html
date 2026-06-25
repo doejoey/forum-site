@@ -53,82 +53,84 @@
 <div id="topics"></div>
 
 <script>
-const supabase = window.supabase.createClient(
-  "https://oemorffqkzzrekogbhpl.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lbW9yZmZxa3p6cmVrb2diaHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTEwODksImV4cCI6MjA5NzkyNzA4OX0.JigEIAh4-IEbzVSvEpPKhPEzpGU8-f1Agtm-7TMzAfQ"
-);
+document.addEventListener("DOMContentLoaded", () => {
 
-async function register() {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
+  const supabase = window.supabase.createClient(
+    "https://oemorffqkzzrekogbhpl.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lbW9yZmZxa3p6cmVrb2diaHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTEwODksImV4cCI6MjA5NzkyNzA4OX0.JigEIAh4-IEbzVSvEpPKhPEzpGU8-f1Agtm-7TMzAfQ"
+  );
 
-  const { error } = await supabase.auth.signUp({
-    email,
-    password
-  });
+  window.register = async function () {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-  if (error) return alert(error.message);
-  alert("Registered! Check email if needed.");
-}
+    const { error } = await supabase.auth.signUp({
+      email,
+      password
+    });
 
-async function login() {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
+    if (error) return alert(error.message);
+    alert("Registered!");
+  };
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
+  window.login = async function () {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-  if (error) return alert(error.message);
-  alert("Logged in!");
-}
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
 
-async function logout() {
-  await supabase.auth.signOut();
-  alert("Logged out");
-}
+    if (error) return alert(error.message);
+    alert("Logged in!");
+  };
 
-async function createTopic() {
-  const { data: { user } } = await supabase.auth.getUser();
+  window.logout = async function () {
+    await supabase.auth.signOut();
+    alert("Logged out");
+  };
 
-  if (!user) return alert("You must be logged in");
+  window.createTopic = async function () {
+    const { data: { user } } = await supabase.auth.getUser();
 
-  const title = document.getElementById('title').value;
-  const content = document.getElementById('content').value;
+    if (!user) return alert("Login first");
 
-  const { error } = await supabase
-    .from('topics')
-    .insert([{ title, content, author_id: user.id }]);
+    const title = document.getElementById('title').value;
+    const content = document.getElementById('content').value;
 
-  if (error) return alert(error.message);
+    const { error } = await supabase
+      .from('topics')
+      .insert([{ title, content, author_id: user.id }]);
 
-  alert("Topic created!");
+    if (error) return alert(error.message);
+
+    alert("Topic created!");
+    loadTopics();
+  };
+
+  async function loadTopics() {
+    const { data } = await supabase
+      .from('topics')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    const div = document.getElementById('topics');
+    div.innerHTML = '';
+
+    data?.forEach(t => {
+      div.innerHTML += `
+        <div class="topic">
+          <h3>${t.title}</h3>
+          <p>${t.content}</p>
+        </div>
+      `;
+    });
+  }
+
   loadTopics();
-}
 
-async function loadTopics() {
-  const { data, error } = await supabase
-    .from('topics')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) return console.log(error);
-
-  const div = document.getElementById('topics');
-  div.innerHTML = '';
-
-  data.forEach(topic => {
-    div.innerHTML += `
-      <div class="topic">
-        <h3>${topic.title}</h3>
-        <p>${topic.content}</p>
-      </div>
-    `;
-  });
-}
-
-loadTopics();
+});
 </script>
 
 </body>
