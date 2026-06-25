@@ -34,6 +34,7 @@
 <h1>My Forum</h1>
 
 <h2>Register / Login</h2>
+
 <input id="email" placeholder="Email">
 <input id="password" type="password" placeholder="Password">
 
@@ -42,36 +43,111 @@
 <button onclick="logout()">Logout</button>
 
 <h2>Create Topic</h2>
+
 <input id="title" placeholder="Topic title">
 <textarea id="content" placeholder="Topic content"></textarea>
+
 <button onclick="createTopic()">Post Topic</button>
 
 <h2>Topics</h2>
 <div id="topics"></div>
 
 <script>
-console.log("JS loaded");
+const supabase = window.supabase.createClient(
+  "https://oemorffqkzzrekogbhpl.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lbW9yZmZxa3p6cmVrb2diaHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTEwODksImV4cCI6MjA5NzkyNzA4OX0.JigEIAh4-IEbzVSvEpPKhPEzpGU8-f1Agtm-7TMzAfQ"
+);
 
-// SAFE TEST FUNCTIONS FIRST (no Supabase yet)
+// REGISTER
+async function register() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
 
-function register() {
-  alert("Register button works");
+  const { error } = await supabase.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  alert("Registered! Check email if required.");
 }
 
-function login() {
-  alert("Login button works");
+// LOGIN
+async function login() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  alert("Logged in!");
 }
 
-function logout() {
-  alert("Logout button works");
+// LOGOUT
+async function logout() {
+  await supabase.auth.signOut();
+  alert("Logged out");
 }
 
-function createTopic() {
-  alert("Create topic button works");
+// CREATE TOPIC
+async function createTopic() {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    alert("You must be logged in");
+    return;
+  }
+
+  const title = document.getElementById('title').value;
+  const content = document.getElementById('content').value;
+
+  const { error } = await supabase
+    .from('topics')
+    .insert([{ title, content, author_id: user.id }]);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  alert("Topic created!");
+  loadTopics();
 }
 
-function loadTopics() {
-  console.log("load topics placeholder");
+// LOAD TOPICS
+async function loadTopics() {
+  const { data, error } = await supabase
+    .from('topics')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.log(error);
+    return;
+  }
+
+  const topicsDiv = document.getElementById('topics');
+  topicsDiv.innerHTML = '';
+
+  data.forEach(topic => {
+    topicsDiv.innerHTML += `
+      <div class="topic">
+        <h3>${topic.title}</h3>
+        <p>${topic.content}</p>
+      </div>
+    `;
+  });
 }
 
 loadTopics();
