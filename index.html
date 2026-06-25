@@ -9,169 +9,175 @@
 
   <style>
     body {
-      font-family: system-ui, -apple-system, Arial, sans-serif;
+      font-family: system-ui;
       background: #0f172a;
       color: #e2e8f0;
-      margin: 0;
-      padding: 20px;
       max-width: 900px;
       margin: auto;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #60a5fa;
-    }
-
-    h2 {
-      margin-top: 30px;
-      color: #93c5fd;
+      padding: 20px;
     }
 
     input, textarea {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       margin: 6px 0;
       border-radius: 8px;
       border: 1px solid #334155;
       background: #1e293b;
       color: white;
-      outline: none;
     }
 
     button {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       margin: 6px 0;
       border-radius: 8px;
       border: none;
       background: #3b82f6;
       color: white;
-      cursor: pointer;
       font-weight: bold;
-    }
-
-    button:hover {
-      background: #2563eb;
     }
 
     .topic {
       background: #1e293b;
-      border: 1px solid #334155;
-      padding: 12px;
-      border-radius: 10px;
+      padding: 10px;
       margin-top: 10px;
+      border-radius: 10px;
     }
 
-    .topic h3 {
-      margin: 0 0 5px 0;
-      color: #60a5fa;
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      opacity: 0.8;
     }
 
-    .topic p {
-      margin: 0;
-      color: #cbd5e1;
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #334155;
     }
   </style>
 </head>
 
 <body>
 
-<h1>Cerbium Forum</h1>
+<h1>Cerbium</h1>
 
-<h2>Register / Login</h2>
-
+<h2>Register</h2>
 <input id="email" placeholder="Email">
 <input id="password" type="password" placeholder="Password">
-
+<input id="username" placeholder="Username">
+<input id="avatar" placeholder="Avatar URL (optional)">
 <button onclick="register()">Register</button>
+
+<h2>Login</h2>
 <button onclick="login()">Login</button>
 <button onclick="logout()">Logout</button>
 
 <h2>Create Topic</h2>
-
-<input id="title" placeholder="Topic title">
-<textarea id="content" placeholder="Topic content"></textarea>
-
+<input id="title" placeholder="Title">
+<textarea id="content" placeholder="Content"></textarea>
 <button onclick="createTopic()">Post Topic</button>
 
 <h2>Topics</h2>
 <div id="topics"></div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+const supabase = window.supabase.createClient(
+  "https://oemorffqkzzrekogbhpl.supabase.co",
+  "YOUR_ANON_KEY"
+);
 
-  const supabase = window.supabase.createClient(
-    "https://oemorffqkzzrekogbhpl.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lbW9yZmZxa3p6cmVrb2diaHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTEwODksImV4cCI6MjA5NzkyNzA4OX0.JigEIAh4-IEbzVSvEpPKhPEzpGU8-f1Agtm-7TMzAfQ"
-  );
+window.register = async function () {
+  const email = email.value;
+  const password = password.value;
+  const username = document.getElementById("username").value;
+  const avatar = document.getElementById("avatar").value;
 
-  window.register = async function () {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+  const { data, error } = await supabase.auth.signUp({ email, password });
 
-    const { error } = await supabase.auth.signUp({ email, password });
+  if (error) return alert(error.message);
 
-    if (error) return alert(error.message);
-    alert("Registered! Check your email.");
-  };
+  const user = data.user;
 
-  window.login = async function () {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+  await supabase.from("profiles").insert({
+    id: user.id,
+    username,
+    avatar_url: avatar
+  });
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+  alert("Registered!");
+};
 
-    if (error) return alert(error.message);
-    alert("Logged in!");
-  };
+window.login = async function () {
+  const email = email.value;
+  const password = password.value;
 
-  window.logout = async function () {
-    await supabase.auth.signOut();
-    alert("Logged out!");
-  };
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
 
-  window.createTopic = async function () {
-    const { data: { user } } = await supabase.auth.getUser();
+  if (error) return alert(error.message);
+  alert("Logged in!");
+};
 
-    if (!user) return alert("Login first");
+window.logout = async function () {
+  await supabase.auth.signOut();
+  alert("Logged out");
+};
 
-    const title = document.getElementById('title').value;
-    const content = document.getElementById('content').value;
+window.createTopic = async function () {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return alert("You must be logged in");
 
-    const { error } = await supabase
-      .from('topics')
-      .insert([{ title, content, author_id: user.id }]);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
-    if (error) return alert(error.message);
+  const title = document.getElementById("title").value;
+  const content = document.getElementById("content").value;
 
-    alert("Topic created!");
-    loadTopics();
-  };
+  const { error } = await supabase.from("topics").insert({
+    title,
+    content,
+    author_id: profile.id
+  });
 
-  async function loadTopics() {
-    const { data } = await supabase
-      .from('topics')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    const div = document.getElementById('topics');
-    div.innerHTML = '';
-
-    data?.forEach(t => {
-      div.innerHTML += `
-        <div class="topic">
-          <h3>${t.title}</h3>
-          <p>${t.content}</p>
-        </div>
-      `;
-    });
-  }
+  if (error) return alert(error.message);
 
   loadTopics();
+};
 
-});
+async function loadTopics() {
+  const { data } = await supabase
+    .from("topics")
+    .select("*, profiles(username, avatar_url)")
+    .order("created_at", { ascending: false });
+
+  const div = document.getElementById("topics");
+  div.innerHTML = "";
+
+  data?.forEach(t => {
+    div.innerHTML += `
+      <div class="topic">
+        <div class="user">
+          <div class="avatar"></div>
+          <strong>${t.profiles?.username || "Unknown"}</strong>
+        </div>
+        <h3>${t.title}</h3>
+        <p>${t.content}</p>
+      </div>
+    `;
+  });
+}
+
+loadTopics();
 </script>
 
 </body>
