@@ -58,7 +58,6 @@ const supabase = window.supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lbW9yZmZxa3p6cmVrb2diaHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTEwODksImV4cCI6MjA5NzkyNzA4OX0.JigEIAh4-IEbzVSvEpPKhPEzpGU8-f1Agtm-7TMzAfQ"
 );
 
-// REGISTER
 async function register() {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
@@ -68,15 +67,10 @@ async function register() {
     password
   });
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  alert("Registered! Check email if required.");
+  if (error) return alert(error.message);
+  alert("Registered! Check email if needed.");
 }
 
-// LOGIN
 async function login() {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
@@ -86,28 +80,19 @@ async function login() {
     password
   });
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
+  if (error) return alert(error.message);
   alert("Logged in!");
 }
 
-// LOGOUT
 async function logout() {
   await supabase.auth.signOut();
   alert("Logged out");
 }
 
-// CREATE TOPIC
 async function createTopic() {
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    alert("You must be logged in");
-    return;
-  }
+  if (!user) return alert("You must be logged in");
 
   const title = document.getElementById('title').value;
   const content = document.getElementById('content').value;
@@ -116,32 +101,25 @@ async function createTopic() {
     .from('topics')
     .insert([{ title, content, author_id: user.id }]);
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
+  if (error) return alert(error.message);
 
   alert("Topic created!");
   loadTopics();
 }
 
-// LOAD TOPICS
 async function loadTopics() {
   const { data, error } = await supabase
     .from('topics')
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (error) {
-    console.log(error);
-    return;
-  }
+  if (error) return console.log(error);
 
-  const topicsDiv = document.getElementById('topics');
-  topicsDiv.innerHTML = '';
+  const div = document.getElementById('topics');
+  div.innerHTML = '';
 
   data.forEach(topic => {
-    topicsDiv.innerHTML += `
+    div.innerHTML += `
       <div class="topic">
         <h3>${topic.title}</h3>
         <p>${topic.content}</p>
