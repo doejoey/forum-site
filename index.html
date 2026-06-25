@@ -1,94 +1,71 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>My Forum</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: auto;
-      padding: 20px;
-    }
-
-    input, textarea, button {
-      width: 100%;
-      margin: 5px 0;
-      padding: 10px;
-    }
-
-    .topic {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body>
-
-<h1>My Forum</h1>
-
-<h2>Register</h2>
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<button onclick="register()">Register</button>
-
-<h2>Login</h2>
-<button onclick="login()">Login</button>
-<button onclick="logout()">Logout</button>
-
-<h2>Create Topic</h2>
-<input id="title" placeholder="Topic title">
-<textarea id="content" placeholder="Topic content"></textarea>
-<button onclick="createTopic()">Post Topic</button>
-
-<h2>Topics</h2>
-<div id="topics"></div>
-
 <script>
 const supabase = window.supabase.createClient(
   "https://oemorffqkzzrekogbhpl.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lbW9yZmZxa3p6cmVrb2diaHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTEwODksImV4cCI6MjA5NzkyNzA4OX0.JigEIAh4-IEbzVSvEpPKhPEzpGU8-f1Agtm-7TMzAfQ"
 );
 
+// REGISTER
 async function register() {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
 
-  const { error } = await supabase.auth.signUp({
+  alert("Register clicked");
+
+  const { data, error } = await supabase.auth.signUp({
     email,
     password
   });
 
-  alert(error ? error.message : "Registration successful. Check your email.");
+  console.log("REGISTER:", data, error);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  alert("Registered! Check your email if confirmation is enabled.");
 }
 
+// LOGIN
 async function login() {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
 
-  const { error } = await supabase.auth.signInWithPassword({
+  alert("Login clicked");
+
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password
   });
 
-  alert(error ? error.message : "Logged in");
+  console.log("LOGIN:", data, error);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  alert("Logged in successfully");
 }
 
+// LOGOUT
 async function logout() {
-  await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
   alert("Logged out");
 }
 
+// CREATE TOPIC
 async function createTopic() {
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    alert("Login first");
+    alert("You must be logged in");
     return;
   }
 
@@ -97,29 +74,33 @@ async function createTopic() {
 
   const { error } = await supabase
     .from('topics')
-    .insert({
-      title,
-      content,
-      author_id: user.id
-    });
+    .insert([{ title, content, author_id: user.id }]);
 
   if (error) {
     alert(error.message);
-  } else {
-    loadTopics();
+    return;
   }
+
+  alert("Topic created!");
+  loadTopics();
 }
 
+// LOAD TOPICS
 async function loadTopics() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('topics')
     .select('*')
     .order('created_at', { ascending: false });
 
+  if (error) {
+    console.log(error);
+    return;
+  }
+
   const topicsDiv = document.getElementById('topics');
   topicsDiv.innerHTML = '';
 
-  data?.forEach(topic => {
+  data.forEach(topic => {
     topicsDiv.innerHTML += `
       <div class="topic">
         <h3>${topic.title}</h3>
@@ -131,6 +112,3 @@ async function loadTopics() {
 
 loadTopics();
 </script>
-
-</body>
-</html>
