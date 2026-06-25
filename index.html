@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cerbium Forum</title>
 
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -42,10 +41,6 @@
       cursor: pointer;
     }
 
-    button:hover {
-      background: #2563eb;
-    }
-
     .topic {
       background: #1e293b;
       padding: 10px;
@@ -65,14 +60,10 @@
 
 <h1>Cerbium</h1>
 
-<!-- 🧪 TEST BUTTON (IMPORTANT) -->
-<button onclick="alert('JS WORKING')">TEST BUTTON</button>
-
 <h2>Register</h2>
 <input id="email" placeholder="Email">
 <input id="password" type="password" placeholder="Password">
 <input id="username" placeholder="Username">
-<input id="avatar" placeholder="Avatar URL (optional)">
 <button onclick="register()">Register</button>
 
 <h2>Login</h2>
@@ -90,9 +81,6 @@
 <div id="topics"></div>
 
 <script>
-console.log("Cerbium script loaded");
-
-// 🔥 Supabase (REAL KEY INCLUDED)
 const supabase = window.supabase.createClient(
   "https://oemorffqkzzrekogbhpl.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lbW9yZmZxa3p6cmVrb2diaHBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTEwODksImV4cCI6MjA5NzkyNzA4OX0.JigEIAh4-IEbzVSvEpPKhPEzpGU8-f1Agtm-7TMzAfQ"
@@ -100,48 +88,40 @@ const supabase = window.supabase.createClient(
 
 // REGISTER
 window.register = async function () {
-  try {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const username = document.getElementById("username").value;
-    const avatar = document.getElementById("avatar").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const username = document.getElementById("username").value;
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password
-    });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password
+  });
 
-    if (error) return alert(error.message);
+  if (error) return alert(error.message);
 
-    await supabase.from("profiles").insert({
-      id: data.user.id,
-      username,
-      avatar_url: avatar
-    });
+  const user = data.user;
 
-    alert("Registered!");
-  } catch (e) {
-    alert("Register error: " + e.message);
-  }
+  await supabase.from("profiles").insert({
+    id: user.id,
+    username
+  });
+
+  alert("Registered!");
 };
 
 // LOGIN
 window.login = async function () {
-  try {
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
 
-    if (error) return alert(error.message);
+  if (error) return alert(error.message);
 
-    alert("Logged in!");
-  } catch (e) {
-    alert("Login error: " + e.message);
-  }
+  alert("Logged in!");
 };
 
 // LOGOUT
@@ -152,58 +132,50 @@ window.logout = async function () {
 
 // CREATE TOPIC
 window.createTopic = async function () {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) return alert("You must be logged in");
+  if (!user) return alert("You must be logged in");
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
-    const title = document.getElementById("title").value;
-    const content = document.getElementById("content").value;
+  const title = document.getElementById("title").value;
+  const content = document.getElementById("content").value;
 
-    const { error } = await supabase.from("topics").insert({
-      title,
-      content,
-      author_id: profile.id
-    });
+  const { error } = await supabase.from("topics").insert({
+    title,
+    content,
+    author_id: profile.id
+  });
 
-    if (error) return alert(error.message);
+  if (error) return alert(error.message);
 
-    alert("Topic created!");
-    loadTopics();
-  } catch (e) {
-    alert("Create error: " + e.message);
-  }
+  alert("Topic created!");
+  loadTopics();
 };
 
 // LOAD TOPICS
 async function loadTopics() {
-  try {
-    const { data } = await supabase
-      .from("topics")
-      .select("*, profiles(username)")
-      .order("created_at", { ascending: false });
+  const { data } = await supabase
+    .from("topics")
+    .select("*, profiles(username)")
+    .order("created_at", { ascending: false });
 
-    const div = document.getElementById("topics");
-    div.innerHTML = "";
+  const div = document.getElementById("topics");
+  div.innerHTML = "";
 
-    data?.forEach(t => {
-      div.innerHTML += `
-        <div class="topic">
-          <div class="user">${t.profiles?.username || "Unknown"}</div>
-          <h3>${t.title}</h3>
-          <p>${t.content}</p>
-        </div>
-      `;
-    });
-  } catch (e) {
-    console.log("Load error:", e);
-  }
+  data?.forEach(t => {
+    div.innerHTML += `
+      <div class="topic">
+        <div class="user">${t.profiles?.username || "Unknown"}</div>
+        <h3>${t.title}</h3>
+        <p>${t.content}</p>
+      </div>
+    `;
+  });
 }
 
 loadTopics();
